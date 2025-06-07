@@ -32,7 +32,7 @@ io.on('connection', (socket) => {
     const { conversationId } = data;
 
     // 1. Send message to other participants in this conversation
-    socket.to(conversationId).emit('receive_message', data);
+    io.to(conversationId).emit('receive_message', data);
 
     // 2. Notify admin dashboard to refresh conversation list
     io.emit('update_conversation', { conversationId });
