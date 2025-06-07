@@ -27,21 +27,24 @@ io.on('connection', (socket) => {
     console.log(`📥 Socket ${socket.id} joined room: ${conversationId}`);
   });
 
-  // Handle message send and broadcast
+    // Handle message send and broadcast
   socket.on('send_message', (data) => {
     const { conversationId } = data;
 
-    // 1. Send message to other participants in this conversation
-    io.to(conversationId).emit('receive_message', data);
+    // Send to all *other* clients in the room
+    socket.to(conversationId).emit('receive_message', data);
 
-    // 2. Notify admin dashboard to refresh conversation list
+    // Echo back to sender (admin or user)
+    socket.emit('receive_message', data);
+
+    // Update conversation list UI
     io.emit('update_conversation', { conversationId });
 
-    // 3. If new conversation just started, notify admin
     if (data.newConversation) {
       io.emit('new_conversation', data);
     }
   });
+
 
   // Admin marks conversation as read
   socket.on('conversation_read', ({ conversationId }) => {
